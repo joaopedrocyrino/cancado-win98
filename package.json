@@ -1,6 +1,6 @@
 {
   "name": "cancado-win98",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A Windows 98 component kit for React — desktop, windows, taskbar and the primitives to build apps inside them",
   "type": "module",
   "sideEffects": [
