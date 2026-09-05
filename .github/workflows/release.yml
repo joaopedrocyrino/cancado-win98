@@ -134,16 +134,29 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Bumping (${{ steps.bump.outputs.type }}) to v$VERSION"
 
+      # Authenticating is not the same as being allowed to publish: a granular
+      # token scoped to "only select packages" passes `whoami` and then fails
+      # the upload with 403. Print what the token can actually write to, so a
+      # mis-scoped token is diagnosable from the log instead of from the 403.
       - name: Verify npm auth
         if: steps.bump.outputs.type != 'none'
         run: |
           set -euo pipefail
           echo "Authenticated to npm as $(npm whoami)"
+
           PACKAGE_NAME="$(node -p "require('./package.json').name")"
+
+          echo "--- packages this token can write ---"
+          npm access list packages 2>&1 || echo "(could not list; token may be classic/automation, which is fine)"
+          echo "-------------------------------------"
+
           if npm view "$PACKAGE_NAME" version >/dev/null 2>&1; then
             echo "$PACKAGE_NAME exists on npm at $(npm view "$PACKAGE_NAME" version)."
           else
-            echo "$PACKAGE_NAME is not on npm yet; this run will create it."
+            echo "::warning::$PACKAGE_NAME does not exist on npm yet — this run must CREATE it."
+            echo "A granular token scoped to 'only select packages' CANNOT create a new"
+            echo "package and will fail with 403. Use a classic Automation token, or a"
+            echo "granular token scoped to 'All packages'."
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
