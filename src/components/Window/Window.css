@@ -1,0 +1,133 @@
+@import '../../styles/base.css';
+
+.w98-window {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--w98-face);
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  min-height: 80px;
+  /* Isolates each window's layout/paint so dragging one never reflows the
+     others, and hints the compositor about the properties that change. */
+  contain: layout paint;
+  will-change: transform, width, height;
+}
+
+/* ---- Title bar ---------------------------------------------------------- */
+.w98-window-titlebar {
+  height: var(--w98-titlebar-height);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 2px 0 3px;
+  background: linear-gradient(
+    to right,
+    var(--w98-title-inactive-1),
+    var(--w98-title-inactive-2)
+  );
+  color: var(--w98-title-text);
+  font-weight: 700;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.w98-window[data-focused='true'] .w98-window-titlebar {
+  background: linear-gradient(
+    to right,
+    var(--w98-title-active-1),
+    var(--w98-title-active-2)
+  );
+}
+
+.w98-window-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--w98-font-size);
+}
+
+.w98-window-icon {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.w98-window-controls {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.w98-titlebar-btn {
+  width: 16px;
+  height: 14px;
+  min-width: 0;
+  background: var(--w98-face);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--w98-text);
+}
+
+.w98-titlebar-btn:active {
+  padding: 1px 0 0 1px;
+}
+
+/* The close button sits slightly apart, as on the real thing. */
+.w98-titlebar-btn--close {
+  margin-left: 2px;
+}
+
+/* ---- Body --------------------------------------------------------------- */
+.w98-window-body {
+  flex: 1;
+  min-height: 0;
+  background: var(--w98-face);
+  padding: var(--w98-window-padding);
+  overflow: auto;
+  font-size: var(--w98-font-size-body);
+  line-height: 1.5;
+  color: var(--w98-text);
+  contain: layout paint;
+}
+
+/* White document well, for text-heavy or list content. */
+.w98-window-body--inset {
+  background: var(--w98-field);
+}
+
+/* ---- Resize grip -------------------------------------------------------- */
+.w98-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background: linear-gradient(
+    135deg,
+    transparent 0 6px,
+    var(--w98-shadow) 6px 7px,
+    transparent 7px 9px,
+    var(--w98-shadow) 9px 10px,
+    transparent 10px 12px,
+    var(--w98-shadow) 12px 13px,
+    transparent 13px
+  );
+}
+
+.w98-root .w98-resize-handle {
+  cursor: nwse-resize;
+}

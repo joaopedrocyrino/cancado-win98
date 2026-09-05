@@ -1,0 +1,366 @@
+/* ============================================================================
+   Primitives — the atoms every window is built from.
+   ========================================================================== */
+
+@import '../styles/base.css';
+
+/* ---- Button ------------------------------------------------------------- */
+.w98-btn {
+  background: var(--w98-face);
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+  padding: 3px 10px;
+  min-width: 75px;
+  color: var(--w98-text);
+}
+
+.w98-btn--compact {
+  min-width: 0;
+  padding: 2px 6px;
+}
+
+.w98-btn:focus-visible {
+  outline: 1px dotted var(--w98-text);
+  outline-offset: -4px;
+}
+
+/* Pressed state shifts content 1px down-right — the button "sinks". */
+.w98-btn:active:not(:disabled),
+.w98-btn[data-pressed='true'] {
+  padding: 4px 9px 2px 11px;
+}
+
+.w98-btn--compact:active:not(:disabled),
+.w98-btn--compact[data-pressed='true'] {
+  padding: 3px 5px 1px 7px;
+}
+
+.w98-btn:disabled {
+  color: var(--w98-text-disabled);
+  text-shadow: 1px 1px 0 var(--w98-text-disabled-shadow);
+}
+
+/* ---- Layout ------------------------------------------------------------- */
+.w98-stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.w98-stack--row {
+  flex-direction: row;
+}
+.w98-stack--wrap {
+  flex-wrap: wrap;
+}
+
+/* Cancels the window body padding so content sits flush to the frame —
+   iframes, canvases, full-bleed grids. */
+.w98-flush {
+  margin: calc(var(--w98-window-padding) * -1);
+  height: calc(100% + var(--w98-window-padding) * 2);
+  overflow: auto;
+}
+.w98-flush--column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Typography --------------------------------------------------------- */
+.w98-title {
+  font-size: 16px;
+  margin: 0;
+}
+.w98-text--meta {
+  color: var(--w98-text-muted);
+}
+.w98-text--strong {
+  font-weight: 700;
+}
+.w98-list {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.6;
+}
+
+/* ---- Strips ------------------------------------------------------------- */
+.w98-toolbar,
+.w98-statusbar {
+  padding: 4px 8px;
+  background: var(--w98-face);
+  flex-shrink: 0;
+}
+.w98-toolbar {
+  border-bottom: 1px solid var(--w98-shadow);
+}
+.w98-statusbar {
+  border-top: 1px solid var(--w98-shadow);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.w98-statusbar-field {
+  padding: 1px 4px;
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.w98-statusbar-field--grow {
+  flex: 1 1 auto;
+}
+
+/* ---- Group box ---------------------------------------------------------- */
+.w98-groupbox {
+  border: 1px solid var(--w98-shadow);
+  padding: 8px 10px 10px;
+  margin: 0;
+  min-width: 0;
+}
+.w98-groupbox-legend {
+  padding: 0 4px;
+}
+
+/* ---- Icon grid + tiles -------------------------------------------------- */
+/* No padding of its own — tiles align to the window body's padding. */
+.w98-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 96px);
+  gap: 8px;
+}
+.w98-tile {
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background: transparent;
+  border: 1px dotted transparent;
+  color: var(--w98-text);
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+}
+.w98-tile[data-selected='true'] {
+  border-color: var(--w98-text);
+  background: var(--w98-selection);
+  color: var(--w98-selection-text);
+}
+/* One consistent thumbnail: a sunken white well holding the glyph. */
+.w98-tile-thumb {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  background: var(--w98-field);
+  border: 2px solid;
+  border-color: var(--w98-shadow) var(--w98-highlight) var(--w98-highlight)
+    var(--w98-shadow);
+}
+.w98-tile-label {
+  text-align: center;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* ---- Tabs --------------------------------------------------------------- */
+.w98-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  border-bottom: 2px solid var(--w98-highlight);
+}
+.w98-tab {
+  border-style: solid;
+  border-width: 2px 2px 0;
+  border-color: var(--w98-highlight) var(--w98-shadow-dark) var(--w98-face);
+  background: var(--w98-face);
+  color: var(--w98-text);
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+  padding: 4px 10px;
+}
+.w98-tab[data-active='true'] {
+  padding-bottom: 6px;
+  font-weight: 700;
+}
+.w98-tabpanel {
+  padding: 10px 8px;
+}
+
+/* ---- Form controls ------------------------------------------------------ */
+.w98-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.w98-field-label {
+  font-size: var(--w98-font-size);
+}
+.w98-field-hint {
+  font-size: 11px;
+  color: var(--w98-text-muted);
+}
+
+.w98-input,
+.w98-textarea,
+.w98-select {
+  background: var(--w98-field);
+  color: var(--w98-text);
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+  padding: 3px 4px;
+  min-width: 0;
+  border-radius: 0;
+}
+.w98-input:focus,
+.w98-textarea:focus,
+.w98-select:focus {
+  outline: none;
+}
+.w98-input:disabled,
+.w98-textarea:disabled,
+.w98-select:disabled {
+  background: var(--w98-face);
+  color: var(--w98-text-disabled);
+}
+.w98-textarea {
+  resize: none;
+}
+.w98-select {
+  appearance: none;
+  padding-right: 20px;
+  background-image: linear-gradient(var(--w98-face), var(--w98-face));
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  background-size: 16px calc(100% - 4px);
+}
+
+/* Checkbox and radio: the native control is hidden and a bevelled box drawn
+   in its place, so keyboard behaviour and form semantics stay native. */
+.w98-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.w98-check-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.w98-check-box {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  background: var(--w98-field);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--w98-text);
+}
+.w98-check-box--radio {
+  border-radius: 50%;
+}
+/* The mark is drawn from `:checked` so uncontrolled inputs need no JS. */
+.w98-check-input:checked ~ .w98-check-box::after {
+  content: '✔';
+}
+.w98-check-input:checked ~ .w98-check-box--radio::after {
+  content: '●';
+  font-size: 8px;
+}
+.w98-check-input:disabled ~ .w98-check-box {
+  background: var(--w98-face);
+}
+.w98-check-input:disabled ~ .w98-check-label {
+  color: var(--w98-text-disabled);
+  text-shadow: 1px 1px 0 var(--w98-text-disabled-shadow);
+}
+.w98-check-input:focus-visible ~ .w98-check-label {
+  outline: 1px dotted var(--w98-text);
+  outline-offset: 1px;
+}
+
+/* ---- Progress bar ------------------------------------------------------- */
+.w98-progress {
+  height: 20px;
+  background: var(--w98-face);
+  padding: 2px;
+  overflow: hidden;
+}
+.w98-progress-track {
+  height: 100%;
+  /* Chunky segmented fill — the Win98 progress "blocks". */
+  background-image: linear-gradient(
+    to right,
+    var(--w98-title-active-1) 0 10px,
+    transparent 10px 12px
+  );
+  background-repeat: repeat-x;
+  background-size: 12px 100%;
+}
+
+/* ---- Menus (Start menu, tray flyouts) ----------------------------------- */
+.w98-menu {
+  display: flex;
+  flex-direction: column;
+  background: var(--w98-face);
+  padding: 2px;
+  min-width: 120px;
+}
+.w98-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 18px 5px 8px;
+  background: transparent;
+  border: 0;
+  font-family: inherit;
+  font-size: var(--w98-font-size-body);
+  color: var(--w98-text);
+  text-align: left;
+  width: 100%;
+}
+.w98-menu-item:hover:not(:disabled),
+.w98-menu-item:focus-visible {
+  background: var(--w98-selection);
+  color: var(--w98-selection-text);
+  outline: none;
+}
+.w98-menu-item:disabled {
+  color: var(--w98-text-disabled);
+  text-shadow: 1px 1px 0 var(--w98-text-disabled-shadow);
+}
+.w98-menu-item-glyph {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.w98-menu--compact .w98-menu-item {
+  padding: 5px 8px;
+  font-size: var(--w98-font-size);
+}
+.w98-menu--compact .w98-menu-item-glyph {
+  width: 16px;
+  height: 16px;
+  font-size: 13px;
+}
+.w98-menu-item-label {
+  flex: 1;
+  white-space: nowrap;
+}
+.w98-menu-item[data-checked='true'] .w98-menu-item-glyph::before {
+  content: '•';
+}

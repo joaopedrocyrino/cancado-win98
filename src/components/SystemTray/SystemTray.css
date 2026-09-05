@@ -1,0 +1,40 @@
+@import '../../styles/base.css';
+
+.w98-tray {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px 0 4px;
+  height: 22px;
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+  color: var(--w98-text);
+  flex-shrink: 0;
+}
+
+.w98-tray-btn {
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+  font-weight: 700;
+  padding: 1px 6px;
+  min-width: 0;
+  background: var(--w98-face);
+  color: var(--w98-text);
+  height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.w98-tray-clock {
+  padding: 0 4px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Flyout anchored above a tray button. `position: fixed` because the taskbar
+   clips its own overflow. */
+.w98-tray-popup {
+  position: fixed;
+  z-index: var(--w98-z-popup);
+}

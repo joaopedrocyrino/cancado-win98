@@ -1,0 +1,80 @@
+name: CI
+
+# Guards the merge, not the release: by the time a PR lands on main the
+# release workflow publishes immediately, so validation has to happen here.
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm typecheck
+
+      - name: Build library
+        run: pnpm build
+
+      # Catches a broken `exports` map or a missing dist file before it ships:
+      # packs the tarball exactly as `npm publish` would and lists its contents.
+      - name: Verify publishable package
+        run: |
+          set -euo pipefail
+          pnpm publish --no-git-checks --dry-run
+          npm pack --dry-run
+
+      # Tells the reviewer which version this PR will produce once merged.
+      - name: Report resulting version bump
+        run: |
+          set -euo pipefail
+          MESSAGES="$(git log --format=%B "origin/${{ github.base_ref }}..HEAD")"
+
+          if echo "$MESSAGES" | grep -qiE '\[skip release\]'; then
+            TYPE=none
+          elif echo "$MESSAGES" | grep -qiE '\[major\]|BREAKING[ -]CHANGE|^[a-z]+(\([^)]*\))?!:'; then
+            TYPE=major
+          elif echo "$MESSAGES" | grep -qiE '\[minor\]|^feat(\([^)]*\))?:'; then
+            TYPE=minor
+          else
+            TYPE=patch
+          fi
+
+          CURRENT="$(node -p "require('./package.json').version")"
+          if [ "$TYPE" = "none" ]; then
+            NEXT="$CURRENT (no release)"
+          else
+            NEXT="$(node -p "
+              const [ma,mi,pa] = require('./package.json').version.split('.').map(Number);
+              ({ major: [ma+1,0,0], minor: [ma,mi+1,0], patch: [ma,mi,pa+1] })['$TYPE'].join('.')
+            ")"
+          fi
+
+          {
+            echo "### Merging this PR will release"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Bump | \`$TYPE\` |"
+            echo "| Current | \`$CURRENT\` |"
+            echo "| Next | \`$NEXT\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

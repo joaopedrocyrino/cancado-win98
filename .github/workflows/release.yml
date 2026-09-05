@@ -1,0 +1,188 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  # Manual runs let you force a specific bump without crafting a commit message.
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump"
+        type: choice
+        default: auto
+        options: [auto, patch, minor, major]
+      dry_run:
+        description: "Build and resolve the version, but don't publish"
+        type: boolean
+        default: false
+
+# Cancel any in-progress run for the same branch so rapid pushes don't pile up.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    # Skip the version-bump commit the bot pushes back to main — otherwise
+    # every release would trigger another release. On workflow_dispatch there
+    # is no head_commit, so this evaluates true and the run proceeds.
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # push version-bump commit + tag
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      # Full history: the bump resolver reads every commit in the push, not
+      # just the tip, so a batch of commits containing one `feat:` still
+      # produces a minor release.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      # ── Setup pnpm ──────────────────────────────────────────────────────────
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # ── Setup Node ──────────────────────────────────────────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      # ── Install ─────────────────────────────────────────────────────────────
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Decide the bump ─────────────────────────────────────────────────────
+      # Precedence:
+      #   1. The workflow_dispatch input, when it isn't "auto".
+      #   2. Markers in the commit messages of this push:
+      #        major  →  [major]  |  BREAKING CHANGE  |  feat!:  |  fix(x)!:
+      #        minor  →  [minor]  |  feat:  |  feat(scope):
+      #        skip   →  [skip release]
+      #   3. patch, otherwise.
+      - name: Resolve version bump
+        id: bump
+        run: |
+          set -euo pipefail
+
+          MANUAL="${{ github.event.inputs.bump }}"
+          if [ -n "$MANUAL" ] && [ "$MANUAL" != "auto" ]; then
+            echo "type=$MANUAL" >> "$GITHUB_OUTPUT"
+            echo "Bump forced by manual run: $MANUAL"
+            exit 0
+          fi
+
+          # Collect every commit message introduced by this push. `before` is
+          # all-zeros on a brand-new branch, so fall back to the tip commit.
+          BEFORE="${{ github.event.before }}"
+          if [ -n "$BEFORE" ] \
+             && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            MESSAGES="$(git log --format=%B "${BEFORE}..${GITHUB_SHA}")"
+          else
+            MESSAGES="$(git log --format=%B -1 "${GITHUB_SHA}")"
+          fi
+
+          echo "--- commit messages considered ---"
+          echo "$MESSAGES"
+          echo "----------------------------------"
+
+          if echo "$MESSAGES" | grep -qiE '\[skip release\]'; then
+            echo "type=none" >> "$GITHUB_OUTPUT"
+            echo "Release skipped by [skip release] marker."
+            exit 0
+          fi
+
+          if echo "$MESSAGES" | grep -qiE '\[major\]|BREAKING[ -]CHANGE|^[a-z]+(\([^)]*\))?!:'; then
+            TYPE=major
+          elif echo "$MESSAGES" | grep -qiE '\[minor\]|^feat(\([^)]*\))?:'; then
+            TYPE=minor
+          else
+            TYPE=patch
+          fi
+
+          echo "type=$TYPE" >> "$GITHUB_OUTPUT"
+          echo "Resolved bump: $TYPE"
+
+      # ── Validate ────────────────────────────────────────────────────────────
+      - name: Type-check
+        if: steps.bump.outputs.type != 'none'
+        run: pnpm typecheck
+
+      # ── Build ───────────────────────────────────────────────────────────────
+      - name: Build library
+        if: steps.bump.outputs.type != 'none'
+        run: pnpm build
+
+      # ── Bump version (not committed yet) ────────────────────────────────────
+      # Writes the new version to package.json on disk only. We commit AFTER a
+      # successful publish so a publish failure never burns a version number.
+      - name: Bump version
+        id: version
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          set -euo pipefail
+          npm version "${{ steps.bump.outputs.type }}" --no-git-tag-version
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Bumping (${{ steps.bump.outputs.type }}) to v$VERSION"
+
+      - name: Verify npm auth
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          set -euo pipefail
+          echo "Authenticated to npm as $(npm whoami)"
+          PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          if npm view "$PACKAGE_NAME" version >/dev/null 2>&1; then
+            echo "$PACKAGE_NAME exists on npm at $(npm view "$PACKAGE_NAME" version)."
+          else
+            echo "$PACKAGE_NAME is not on npm yet; this run will create it."
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry run summary
+        if: steps.bump.outputs.type != 'none' && github.event.inputs.dry_run == 'true'
+        run: |
+          echo "Dry run — would publish v${{ steps.version.outputs.version }}."
+          pnpm publish --no-git-checks --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ── Publish to npm ──────────────────────────────────────────────────────
+      # Runs BEFORE the git commit. If it fails, nothing is persisted and the
+      # next push retries cleanly from the same base version.
+      - name: Publish to npm registry
+        if: steps.bump.outputs.type != 'none' && github.event.inputs.dry_run != 'true'
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ── Commit & tag (only reached if publish succeeded) ────────────────────
+      - name: Commit version bump and push tag
+        if: steps.bump.outputs.type != 'none' && github.event.inputs.dry_run != 'true'
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: release v${{ steps.version.outputs.version }} [skip ci]"
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin HEAD:main --follow-tags
+
+      - name: Summary
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          {
+            echo "### Released \`v${{ steps.version.outputs.version }}\`"
+            echo ""
+            echo "- Bump: **${{ steps.bump.outputs.type }}**"
+            echo "- Dry run: ${{ github.event.inputs.dry_run == 'true' }}"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,94 @@
+@import '../../styles/base.css';
+
+.w98-taskbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--w98-taskbar-height);
+  background: var(--w98-face);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  gap: 4px;
+  z-index: var(--w98-z-taskbar);
+  border-top: 1px solid var(--w98-highlight);
+}
+
+/* ---- Start button ------------------------------------------------------- */
+.w98-start-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--w98-face);
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+  font-weight: 700;
+  padding: 2px 6px;
+  min-width: 0;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--w98-text);
+}
+
+/* The four-pane flag, drawn with a grid instead of an image. */
+.w98-start-flag {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  grid-template: repeat(2, 1fr) / repeat(2, 1fr);
+  gap: 1px;
+  flex-shrink: 0;
+}
+.w98-start-flag span:nth-child(1) { background: #ff0000; }
+.w98-start-flag span:nth-child(2) { background: #00ff00; }
+.w98-start-flag span:nth-child(3) { background: #0000ff; }
+.w98-start-flag span:nth-child(4) { background: #ffff00; }
+
+/* ---- Task buttons ------------------------------------------------------- */
+.w98-taskbar-tasks {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.w98-taskbar-task {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--w98-face);
+  font-family: inherit;
+  font-size: var(--w98-font-size);
+  height: 22px;
+  padding: 2px 6px;
+  /* Buttons share the strip evenly and shrink together as more windows open. */
+  flex: 0 1 160px;
+  min-width: 0;
+  color: var(--w98-text);
+}
+
+/* The focused task reads as pressed, with the subtle diagonal hatch Win98
+   used to distinguish "active" from merely "held". */
+.w98-taskbar-task[data-active='true'] {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 2px,
+    rgba(255, 255, 255, 0.4) 2px 3px
+  );
+}
+
+.w98-taskbar-task-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.w98-taskbar-task-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

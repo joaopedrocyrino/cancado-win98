@@ -1,0 +1,31 @@
+@import '../../styles/base.css';
+
+.w98-shutdown {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  color: #c0c0c0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: var(--w98-z-overlay);
+  font-family: var(--w98-font-mono);
+  cursor: var(--w98-cursor-arrow);
+}
+
+/* The amber "safe to turn off" text, phosphor glow and all. */
+.w98-shutdown-message {
+  font-size: 22px;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 0 24px;
+  color: #ff8c2a;
+  text-shadow: 0 0 4px rgba(255, 140, 42, 0.4);
+}
+
+.w98-shutdown-hint {
+  font-size: 12px;
+  opacity: 0.6;
+}

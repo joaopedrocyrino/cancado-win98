@@ -1,0 +1,48 @@
+@import '../../styles/base.css';
+
+.w98-startmenu {
+  position: absolute;
+  bottom: var(--w98-taskbar-height);
+  left: 0;
+  z-index: var(--w98-z-popup);
+  display: flex;
+  background: var(--w98-face);
+  padding: 2px;
+  min-width: 180px;
+  max-height: calc(100% - var(--w98-taskbar-height) - 8px);
+}
+
+/* The vertical branding gutter. */
+.w98-startmenu-side {
+  width: 21px;
+  flex-shrink: 0;
+  position: relative;
+  background: linear-gradient(to bottom, #08084a 0%, #00007a 50%, #5a5a8a 100%);
+}
+
+.w98-startmenu-side-text {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  /* Rotated in place: the text reads bottom-to-top up the gutter. */
+  transform: rotate(-90deg) translateX(50%);
+  transform-origin: right bottom;
+  white-space: nowrap;
+  color: #c0c0c0;
+  font-family: "MS Sans Serif", Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.w98-startmenu-side-text b {
+  color: #fff;
+}
+
+.w98-startmenu-items {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}

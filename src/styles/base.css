@@ -1,0 +1,152 @@
+/* ============================================================================
+   Scoped reset, bevel system and cursors.
+
+   Everything is namespaced under `.w98-root` so dropping the kit into an
+   existing app never leaks styles into the host page.
+   ========================================================================== */
+
+@import './tokens.css';
+
+/* ---- Root scope --------------------------------------------------------- */
+.w98-root,
+.w98-root *,
+.w98-root *::before,
+.w98-root *::after {
+  box-sizing: border-box;
+}
+
+.w98-root {
+  position: relative;
+  font-family: var(--w98-font);
+  font-size: var(--w98-font-size);
+  color: var(--w98-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Fills the viewport. Off by default so the desktop can be embedded in a page. */
+.w98-root--fullscreen {
+  position: fixed;
+  inset: 0;
+}
+
+.w98-root button {
+  margin: 0;
+  font-family: inherit;
+}
+
+/* ---- Bevels ------------------------------------------------------------- */
+/* The whole look is three border treatments. Each is a 2px border plus a 1px
+   inset shadow, which is how Win98 faked a 4-tone 3D edge in 2 pixels. */
+
+/* Raised — windows, buttons at rest, taskbar. */
+.w98-bevel-out {
+  border-style: solid;
+  border-width: var(--w98-border-width);
+  border-color: var(--w98-highlight) var(--w98-shadow-dark)
+    var(--w98-shadow-dark) var(--w98-highlight);
+  box-shadow:
+    inset 1px 1px 0 0 var(--w98-face-light),
+    inset -1px -1px 0 0 var(--w98-shadow);
+}
+
+/* Sunken — text fields, status wells, the tray. */
+.w98-bevel-in {
+  border-style: solid;
+  border-width: var(--w98-border-width);
+  border-color: var(--w98-shadow) var(--w98-highlight) var(--w98-highlight)
+    var(--w98-shadow);
+  box-shadow:
+    inset 1px 1px 0 0 var(--w98-shadow-dark),
+    inset -1px -1px 0 0 var(--w98-face-light);
+}
+
+/* Pressed — a raised bevel inverted, for held/active buttons. */
+.w98-bevel-pressed {
+  border-style: solid;
+  border-width: var(--w98-border-width);
+  border-color: var(--w98-shadow-dark) var(--w98-highlight)
+    var(--w98-highlight) var(--w98-shadow-dark);
+  box-shadow:
+    inset 1px 1px 0 0 var(--w98-shadow),
+    inset -1px -1px 0 0 var(--w98-face-light);
+}
+
+/* Applied via [data-*] on components that toggle pressed state. `!important`
+   because it has to beat the `.w98-bevel-out` class sitting on the same node. */
+.w98-root [data-pressed='true'] {
+  border-color: var(--w98-shadow-dark) var(--w98-highlight) var(--w98-highlight)
+    var(--w98-shadow-dark) !important;
+  box-shadow:
+    inset 1px 1px 0 0 var(--w98-shadow),
+    inset -1px -1px 0 0 var(--w98-face-light) !important;
+}
+
+/* ---- Etched separator --------------------------------------------------- */
+.w98-separator {
+  height: 0;
+  margin: 3px 2px;
+  border-top: 1px solid var(--w98-shadow);
+  border-bottom: 1px solid var(--w98-highlight);
+}
+
+.w98-separator--vertical {
+  width: 0;
+  height: auto;
+  align-self: stretch;
+  margin: 2px;
+  border: 0;
+  border-left: 1px solid var(--w98-shadow);
+  border-right: 1px solid var(--w98-highlight);
+}
+
+/* ---- Inline link -------------------------------------------------------- */
+.w98-link {
+  color: var(--w98-link);
+  text-decoration: underline;
+}
+.w98-link:visited {
+  color: var(--w98-link-visited);
+}
+
+/* ---- Cursors ------------------------------------------------------------ */
+/* Inlined SVG: no network round-trip and no asset to ship. The keyword after
+   each URL is the fallback for browsers that reject SVG cursors. */
+.w98-root {
+  --w98-cursor-arrow: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='20' height='24' viewBox='0 0 20 24'>\
+<path d='M 1 1 L 1 16 L 5 12 L 8 19 L 11 18 L 8 11 L 14 11 Z' \
+fill='black' stroke='white' stroke-width='1.5' stroke-linejoin='miter'/>\
+</svg>") 1 1, default;
+
+  --w98-cursor-link: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'>\
+<path d='M 8 1 L 8 11 L 6 11 L 4 13 L 4 18 L 6 21 L 16 21 L 18 19 L 18 11 L 17 10 L 15 10 L 15 11 L 14 11 L 14 9 L 13 8 L 11 8 L 11 9 L 10 9 L 10 1 Z' \
+fill='black' stroke='white' stroke-width='1.5' stroke-linejoin='miter'/>\
+</svg>") 8 1, pointer;
+}
+
+.w98-root,
+.w98-root * {
+  cursor: var(--w98-cursor-arrow);
+}
+
+.w98-root a,
+.w98-root a *,
+.w98-root button,
+.w98-root button * {
+  cursor: var(--w98-cursor-link);
+}
+
+.w98-root [aria-disabled='true'],
+.w98-root button:disabled,
+.w98-root button:disabled * {
+  cursor: var(--w98-cursor-arrow);
+}
+
+/* Opt out on a subtree — useful for embedded iframes and canvases. */
+.w98-native-cursor,
+.w98-native-cursor * {
+  cursor: auto;
+}

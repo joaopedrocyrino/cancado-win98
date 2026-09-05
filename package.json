@@ -1,0 +1,118 @@
+{
+  "name": "cancado-win98",
+  "version": "0.0.1",
+  "description": "A Windows 98 component kit for React — desktop, windows, taskbar and the primitives to build apps inside them",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles": "./dist/index.css",
+    "./tokens": {
+      "import": "./dist/tokens.mjs",
+      "types": "./dist/entries/tokens.d.ts"
+    },
+    "./tokens.css": "./dist/tokens.css",
+    "./core": {
+      "import": "./dist/core.mjs",
+      "types": "./dist/entries/core.d.ts"
+    },
+    "./wm": {
+      "import": "./dist/wm.mjs",
+      "types": "./dist/entries/wm.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks.mjs",
+      "types": "./dist/entries/hooks.d.ts"
+    },
+    "./primitives": {
+      "import": "./dist/primitives.mjs",
+      "types": "./dist/entries/primitives.d.ts"
+    },
+    "./Desktop": {
+      "import": "./dist/Desktop.mjs",
+      "types": "./dist/entries/Desktop.d.ts"
+    },
+    "./DesktopIcon": {
+      "import": "./dist/DesktopIcon.mjs",
+      "types": "./dist/entries/DesktopIcon.d.ts"
+    },
+    "./Window": {
+      "import": "./dist/Window.mjs",
+      "types": "./dist/entries/Window.d.ts"
+    },
+    "./Taskbar": {
+      "import": "./dist/Taskbar.mjs",
+      "types": "./dist/entries/Taskbar.d.ts"
+    },
+    "./StartMenu": {
+      "import": "./dist/StartMenu.mjs",
+      "types": "./dist/entries/StartMenu.d.ts"
+    },
+    "./ShutdownScreen": {
+      "import": "./dist/ShutdownScreen.mjs",
+      "types": "./dist/entries/ShutdownScreen.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "vite build && node scripts/concat-css.mjs",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.5.0",
+    "@storybook/addon-interactions": "^8.5.0",
+    "@storybook/blocks": "^8.5.0",
+    "@storybook/react": "^8.5.0",
+    "@storybook/react-vite": "^8.5.0",
+    "@storybook/test": "^8.5.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "storybook": "^8.5.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.3.0",
+    "vite-plugin-lib-inject-css": "^2.2.2"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "windows-98",
+    "win98",
+    "retro",
+    "desktop",
+    "window-manager",
+    "typescript",
+    "design-system"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joaopedrocyrino/cancado-win98"
+  }
+}
